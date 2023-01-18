@@ -9,9 +9,9 @@ ON s.product_id = m.product_id
 GROUP BY customer_id;
 
 customer_id     Total_Spent
-  B			            74
-  C			            36	
-  A			            76
+  B		    74
+  C	            36	
+  A		    76
 
 
 
@@ -24,9 +24,9 @@ FROM dannys_diner.sales
 GROUP BY customer_id;
 
 customer_id     No_of_Visits
-       B			      6
-       C			      3	
-       A			      6
+       B.            6
+       C	     3	
+       A.            6
 
 
 -- 3. What was the first item from the menu purchased by each customer?
@@ -55,9 +55,9 @@ FROM CTE1
 WHERE row_number = 1;
 
 customer_id	order_date	            product_id	product_name
-A	          2021-01-01T00:00:00.000Z	  2	        curry
-B	          2021-01-01T00:00:00.000Z	  2	        curry
-C	          2021-01-01T00:00:00.000Z	  3	        ramen
+  A	          2021-01-01T00:00:00.000Z	  2	     curry
+  B	          2021-01-01T00:00:00.000Z	  2	     curry
+  C	          2021-01-01T00:00:00.000Z	  3	      ramen
 
 
 -- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
@@ -156,9 +156,9 @@ FROM Tab1
 where rank=1;
 
 customer_id	product_id	product_name
-      A	        1	        sushi
-      A	        2	        curry
-      B	        1	        sushi
+      A	         1	        sushi
+      A	         2	        curry
+      B	         1	        sushi
 
 -- 8. What is the total items and amount spent for each member before they became a member?
 Query 1: To find the Items bought before becoming a member
@@ -208,9 +208,9 @@ GROUP BY customer_id
 ORDER BY customer_id;
 
 customer_id	points
-    A	        860
-    B	        940
-    C	        360
+    A	         860
+    B	         940
+    C	         360
 
 
 -- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
@@ -238,6 +238,6 @@ GROUP BY customer_id
 ORDER BY customer_id;
 
 customer_id	points
-    A	      1010
-    B	      820
+    A	         1010
+    B	         820
 
