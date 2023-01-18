@@ -37,6 +37,5 @@ Danny has shared 3 key datasets for this case study: sales, menu, members
 •	Before taking the membership, Customer A has bought 2 items with a Total amount of $25 and B has bought 3 items with a total amount of $40
 •	Customers A, B and C have earned Total points of 860, 940 and 360 based on their purchases without their membership.
 •	As Customers A and B took membership and can earn 20 points for every $1 spent irrespective of the items, they earned total Points of 1010 and 820 by the end of January 2021.
-![image](https://user-images.githubusercontent.com/82135370/213313687-977d8d34-5b26-4f15-af84-0ee180ecccf8.png)
 
 You can find the complete challenge here: https://8weeksqlchallenge.com/case-study-1/
