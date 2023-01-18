@@ -1,0 +1,243 @@
+-- CASE STUDY QUESTIONS
+
+--1.What is the total amount each customer spent at the restaurant?
+
+SELECT customer_id,sum(price) AS Total_Spent
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id
+GROUP BY customer_id;
+
+customer_id     Total_Spent
+  B			            74
+  C			            36	
+  A			            76
+
+
+
+-- 2. How many days has each customer visited the restaurant?
+
+SELECT
+  	customer_id,
+    count(order_date) AS No_of_Visits
+FROM dannys_diner.sales
+GROUP BY customer_id;
+
+customer_id     No_of_Visits
+       B			      6
+       C			      3	
+       A			      6
+
+
+-- 3. What was the first item from the menu purchased by each customer?
+
+1st Query:
+To find the First item purchased First Joined the 2 Tables sales and menu using INNER JOIN to display customer_id,order_date,m.product_id, product_name.
+
+2ND Query: By using CTE, To find the first product purchased, Used window Function on the Output of First Query, to give Row Number to each Row and Then Partitioned the Rows by customer_id and Ordered it by order_date.
+
+3rd Query: The Output of the 2nd Query was Used to Find the First Purchase by each customer by using a WHERE clause where the Condition was row_number =1
+
+WITH CTE AS(
+SELECT customer_id,order_date,m.product_id, product_name
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id),
+
+CTE1 AS(
+SELECT
+ROW_NUMBER() OVER(PARTITION BY customer_id ORDER BY order_date),customer_id,order_date,product_id, product_name
+FROM CTE)
+
+SELECT
+customer_id,order_date,product_id, product_name
+FROM CTE1
+WHERE row_number = 1;
+
+customer_id	order_date	            product_id	product_name
+A	          2021-01-01T00:00:00.000Z	  2	        curry
+B	          2021-01-01T00:00:00.000Z	  2	        curry
+C	          2021-01-01T00:00:00.000Z	  3	        ramen
+
+
+-- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+
+Joined the 2 tables sales and menu , Grouped the output based on product name and ordered it in DESC order to find the most Bought product and no of times by all customers
+
+SELECT m.product_name, COUNT(s.product_id) AS No_of_Times_Bought
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id
+GROUP BY m.product_name
+ORDER BY No_of_Times_Bought DESC;
+
+product_name	no_of_times_bought
+    ramen	          8
+    curry	          4
+    sushi	          3
+
+
+-- 5. Which item was the most popular for each customer?
+Here dense_rank is used to find the popular item among each customer
+
+WITH CTE2 AS(
+SELECT customer_id,product_name, COUNT(s.product_id) AS No_of_Times_Bought
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id
+GROUP BY customer_id,m.product_name
+ORDER BY No_of_Times_Bought DESC),
+
+CTE3 AS(
+SELECT
+dense_rank() OVER(PARTITION BY customer_id
+                  ORDER BY No_of_Times_Bought DESC),customer_id,product_name,No_of_Times_Bought
+FROM CTE2)
+
+SELECT customer_id,product_name,No_of_Times_Bought
+FROM CTE3
+WHERE dense_rank =1;
+
+customer_id	product_name	no_of_times_bought
+    A	        ramen	            3
+    B	        sushi	            2
+    B	        curry	            2
+    B	        ramen	            2
+    C	        ramen	            3
+
+
+-- 6. Which item was purchased first by the customer after they became a member?
+1st Query: Joined the Tables sales and members and found the orders that came after the customer joined
+2nd Query: Used the rank function on the table obtained as the output of 1st query, Partioned it based on Customer_id and order by order_date
+3rd Query: Joined with the table menu to obtain the name of the item and in the where clause took only the row with 1 to find the First product
+
+WITH new AS(
+SELECT s.customer_id,order_date,product_id,join_date
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.members me
+ON s.customer_id = me.customer_id
+WHERE order_date > join_date),
+
+new1 AS(
+SELECT 
+dense_rank() OVER(PARTITION BY customer_id ORDER BY order_date ASC),customer_id,order_date,product_id
+FROM new)
+
+SELECT 
+customer_id,order_date,product_name
+FROM new1 n
+INNER JOIN dannys_diner.menu m
+ON n.product_id= m.product_id
+WHERE dense_rank =1;
+
+customer_id	  order_date	              product_name
+    B	        2021-01-11T00:00:00.000Z	  sushi
+    A	        2021-01-10T00:00:00.000Z	  ramen
+
+-- 7. Which item was purchased just before the customer became a member?
+
+WITH Tab AS(
+SELECT s.customer_id,order_date,s.product_id,product_name
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id
+INNER JOIN dannys_diner.members me
+ON s.customer_id = me.customer_id
+WHERE order_date < join_date),
+
+Tab1 AS(
+SELECT
+RANK() OVER(PARTITION BY customer_id ORDER BY order_date DESC),customer_id,product_id,product_name
+FROM Tab)
+
+SELECT
+customer_id,product_id,product_name
+FROM Tab1
+where rank=1;
+
+customer_id	product_id	product_name
+      A	        1	        sushi
+      A	        2	        curry
+      B	        1	        sushi
+
+-- 8. What is the total items and amount spent for each member before they became a member?
+Query 1: To find the Items bought before becoming a member
+Query 2: To Find the No of Product bought and the total amount spent by each customer
+
+WITH neworder AS(
+SELECT s.customer_id,s.product_id,product_name,price
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id
+INNER JOIN dannys_diner.members me
+ON s.customer_id = me.customer_id
+WHERE order_date < join_date)
+
+SELECT customer_id,count(product_name) AS No_of_Items,SUM(price) AS Total_Price
+FROM neworder
+GROUP BY customer_id
+ORDER BY customer_id;
+
+customer_id	no_of_items	total_price
+    A	          2	          25
+    B	          3	          40
+
+-- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+
+1st Query: To JOIN the tables sales and menu 
+2nd Query: To find the Points on each of the item
+3rd Query: To find the Sum of Points obtained by each customer
+
+WITH CTE AS(
+SELECT customer_id,s.product_id,product_name,price
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id),
+
+CTE1 AS(
+SELECT customer_id,product_name,
+CASE 
+	WHEN product_id='1' THEN (price*20) 
+	ELSE price*10 
+    END AS Points
+FROM CTE)
+
+SELECT customer_id,SUM(points) AS Points
+FROM CTE1
+GROUP BY customer_id
+ORDER BY customer_id;
+
+customer_id	points
+    A	        860
+    B	        940
+    C	        360
+
+
+-- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+
+WITH ordered AS(
+SELECT s.customer_id,product_name,order_date,join_date,price
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id
+INNER JOIN dannys_diner.members me
+ON s.customer_id = me.customer_id
+WHERE order_date <= '2021-01-31'),
+NEW AS(
+SELECT customer_id,
+CASE
+	WHEN order_date IN (join_date,join_date+6) THEN (price*20)
+    WHEN product_name= 'sushi' THEN (price*20)
+    ELSE (price*10) 
+    END AS Points
+FROM ordered)
+
+SELECT customer_id,SUM(points) AS Points
+FROM NEW
+GROUP BY customer_id
+ORDER BY customer_id;
+
+customer_id	points
+    A	      1010
+    B	      820
+
