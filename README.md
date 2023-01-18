@@ -25,7 +25,7 @@ Danny has shared 3 key datasets for this case study: sales, menu, members
 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
 
-# INSIGHTS
+# Insights
 
 *	Out of the three Customers A, B and C, 2 customers A& B have joined the membership and there are 3 products offered at Danny’s Diner: sushi, curry and ramen.
 *	Customer A has spent the highest amount of $76 at Dany’s Diner, followed by B and C
